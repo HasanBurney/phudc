@@ -1,5 +1,4 @@
 #include <iostream>
-#include <conio.h>
 #include <windows.h>
 #include <cstdlib>
 # include <math.h>
@@ -13,11 +12,14 @@
 #define paddingy 1
 #pragma warning(disable : 4996)
 using namespace std;
-
-HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE); // used for goto
-COORD CursorPosition; // used for goto
-
-void gotoXY(int, int); // function defined below if this is new to you.
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+COORD CursorPosition;
+void gotoXY(int x, int y)
+{
+	CursorPosition.X = x;
+	CursorPosition.Y = y;
+	SetConsoleCursorPosition(console, CursorPosition);
+}
 
 
 void Populate(int** arr, int n, int k) {
@@ -105,56 +107,54 @@ void MatrixAddition() {
 
 void MoveDataBlockLine_A(int** A, int lineNumber)
 {
-	int jump = N / 4;
 	int tmp[N / 4][N / 4];
 
-	for (int i = 0; i < jump; i++)
-		for (int j = 0; j < jump; j++)
-			tmp[i][j] = A[i + jump * lineNumber][j];
+	for (int i = 0; i < 1; i++)
+		for (int j = 0; j < 1; j++)
+			tmp[i][j] = A[i + 1 * lineNumber][j];
 
 	for (int k = 0; k < 3; k++)
 	{
-		for (int i = 0; i < jump; i++)
-			for (int j = 0; j < jump; j++)
-				A[i + jump * lineNumber][j + jump * k] = A[i + jump * lineNumber][j + jump * (k + 1)];
+		for (int i = 0; i < 1; i++)
+			for (int j = 0; j < 1; j++)
+				A[i + 1 * lineNumber][j + 1 * k] = A[i + 1 * lineNumber][j + 1 * (k + 1)];
 	}
 
-	for (int i = 0; i < jump; i++)
-		for (int j = 0; j < jump; j++)
-			A[i + jump * lineNumber][j + jump * 3] = tmp[i][j];
+	for (int i = 0; i < 1; i++)
+		for (int j = 0; j < 1; j++)
+			A[i + 1 * lineNumber][j + 1 * 3] = tmp[i][j];
 }
 
 void MoveDataBlockLine_B(int** B, int lineNumber)
 {
-	int jump = N / 4;
 	int tmp[N / 4][N / 4];
 
-	for (int i = 0; i < jump; i++)
-		for (int j = 0; j < jump; j++)
-			tmp[i][j] = B[i][j + jump * lineNumber];
+	for (int i = 0; i < 1; i++)
+		for (int j = 0; j < 1; j++)
+			tmp[i][j] = B[i][j + 1 * lineNumber];
 
 	for (int k = 0; k < 3; k++)
 	{
-		for (int i = 0; i < jump; i++)
-			for (int j = 0; j < jump; j++)
-				B[i + jump * k][j + jump * lineNumber] = B[i + jump * (k + 1)][j + jump * lineNumber];
+		for (int i = 0; i < 1; i++)
+			for (int j = 0; j < 1; j++)
+				B[i + 1 * k][j + 1 * lineNumber] = B[i + 1 * (k + 1)][j + 1 * lineNumber];
 	}
 
-	for (int i = 0; i < jump; i++)
-		for (int j = 0; j < jump; j++)
-			B[i + jump * 3][j + jump * lineNumber] = tmp[i][j];
+	for (int i = 0; i < 1; i++)
+		for (int j = 0; j < 1; j++)
+			B[i + 1 * 3][j + 1 * lineNumber] = tmp[i][j];
 }
 
 void MutiplyBlock(int** A, int** B, int** C, int bi, int bj)
 {
-	int jump = N / 4;
-	for (int i = 0; i < jump; i++)
-		for (int j = 0; j < jump; j++)
-			C[i + jump * bi][j + jump * bj] += A[i + jump * bi][j + jump * bj] * B[i + jump * bi][j + jump * bj];
+	
+	for (int i = 0; i < 1; i++)
+		for (int j = 0; j < 1; j++)
+			C[i + 1 *bi][j + 1 * bj] += A[i + 1 * bi][j + 1 * bj] * B[i + 1 * bi][j + 1 * bj];
 }
 
 void CannonsTheorum() {
-	int jump = N / 4,l;
+	int l;
 	int** A = new int* [N];
 	for (int i = 0; i < N; i++)
 		A[i] = new int[N];
@@ -193,6 +193,8 @@ void CannonsTheorum() {
 		}
 		cout << endl;
 	}
+	clock_t start, end;
+	start = clock();
 	omp_set_num_threads(2);
 	if (N % 4 == 0)
 	{
@@ -203,6 +205,8 @@ void CannonsTheorum() {
 
 #pragma omp section    
 				{
+					cout << "\n Sections 1, thread number " << omp_get_thread_num();
+					MoveDataBlockLine_A(A, 1);
 					MoveDataBlockLine_A(A, 2);
 					MoveDataBlockLine_A(A, 2);
 					MoveDataBlockLine_A(A, 3);
@@ -267,7 +271,9 @@ void CannonsTheorum() {
 		}
 		cout << endl;
 	}
-
+	end = clock();
+	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+	cout << "\n\nTime taken by program is : " << fixed << time_taken<< " sec" <<endl;
 }
 
 void matGene(int* A, int size) {
@@ -383,6 +389,8 @@ void GuassJordan() {
 		result[j] = b[this_index];
 	}
 
+	cout << "\nResultant matrix : \n: <<end" << endl;
+		matShow(A, n);
 	cout << "\nResultant Vector values: \n" << endl;
 	vecShow(result, n);
 
@@ -435,7 +443,10 @@ void SimpleMatrixMultiplication() {
 
 	cout << "\nProcessors available: " << omp_get_num_procs();
 	cout << "\nThreads available: " << thread_num;
-	wtime = omp_get_wtime();
+	clock_t start, end;
+
+
+	start = clock();
 
 # pragma omp parallel shared ( a, b, c, n1 ,n2, k1, k2 ) 
 	{
@@ -479,8 +490,9 @@ void SimpleMatrixMultiplication() {
 		}
 		cout << endl;
 	}
-	wtime = omp_get_wtime() - wtime;
-	cout << "\nElapsed seconds = " << wtime;
+	end = clock();
+	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+	cout << "\n\nTime taken by program is : " << fixed << time_taken << " sec" << endl;
 	cout << endl;
 	cin.ignore();
 }
@@ -593,9 +605,3 @@ int main()
 	return 0;
 }
 
-void gotoXY(int x, int y)
-{
-	CursorPosition.X = x;
-	CursorPosition.Y = y;
-	SetConsoleCursorPosition(console, CursorPosition);
-}
