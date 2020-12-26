@@ -86,14 +86,17 @@ void MatrixAddition() {
 		}
 		cout << endl;
 	}
-
+	clock_t start, end;
+	start = clock();
 #pragma omp parallel for num_threads(4)
 		for (int i = 0; i < n; i++) {
+#pragma omp parallel for
 			for (int j = 0; j < k; j++) {
 				f[i][j] = a[i][j] + b[i][j];
 			}
 		}
-
+		end = clock();
+		double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
 	cout << "\nResultant Matrix: \n" << endl;
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < k; j++)
@@ -102,6 +105,8 @@ void MatrixAddition() {
 		}
 		cout << endl;
 	}
+	cout << "\n\nTime taken by program is : " << fixed << time_taken << endl;
+
 	cin.ignore();
 }
 
@@ -263,7 +268,8 @@ void CannonsTheorum() {
 	}
 	else
 		cout << "\n Error! N % 4 != 0 ! ";
-
+	end = clock();
+	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
 	cout << "\n\nResultant Matrix: " << endl;
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
@@ -271,8 +277,7 @@ void CannonsTheorum() {
 		}
 		cout << endl;
 	}
-	end = clock();
-	double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+	
 	cout << "\n\nTime taken by program is : " << fixed << time_taken<< " sec" <<endl;
 }
 
@@ -389,7 +394,7 @@ void GuassJordan() {
 		result[j] = b[this_index];
 	}
 
-	cout << "\nResultant matrix : \n: <<end" << endl;
+	cout << "\nResultant matrix : \n" << endl;
 		matShow(A, n);
 	cout << "\nResultant Vector values: \n" << endl;
 	vecShow(result, n);
